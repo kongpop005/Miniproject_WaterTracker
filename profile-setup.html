@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile setup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-blue-100 min-h-screen flex justify-center items-start p-8">
+
+  <div class="bg-white w-full max-w-6xl rounded-3xl shadow-2xl p-10 mt-10">
+    <h2 class="text-3xl font-bold text-center text-blue-700 mb-10">Profile Setup</h2>
+
+    <div class="flex flex-col md:flex-row gap-12">
+
+      <!-- Left Panel: Profile Picture & Info -->
+      <div class="flex flex-col items-center md:w-1/3 bg-blue-50 p-6 rounded-2xl shadow-inner">
+        <div class="relative w-36 h-36 mb-4">
+          <img id="profilePic" src="https://via.placeholder.com/150" alt="Profile" class="w-36 h-36 rounded-full object-cover border-4 border-blue-300">
+          <label for="uploadPic" class="absolute bottom-0 right-0 bg-blue-500 text-white text-sm px-4 py-2 rounded-full cursor-pointer hover:bg-blue-600 transition">
+            Upload
+          </label>
+          <input type="file" id="uploadPic" accept="image/*" class="hidden">
+        </div>
+        <!-- แสดงเฉพาะ User ID -->
+        <p class="text-gray-500 text-sm mb-6">ID: <span id="displayUserId">12345</span></p>
+        <button id="logoutBtn" class="w-full bg-red-500 text-white py-3 rounded-lg hover:bg-red-600 transition">Logout</button>
+      </div>
+
+      <!-- Right Panel: Profile Form -->
+      <div class="md:w-2/3 bg-white p-8 rounded-2xl shadow-inner">
+        <form id="profileForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <!-- User ID -->
+          <div class="md:col-span-2">
+            <label class="block text-gray-700 font-medium mb-2">ไอดีผู้ใช้</label>
+            <input type="text" id="userId" class="w-full border border-gray-300 px-4 py-3 rounded-xl bg-gray-100" readonly>
+          </div>
+
+          <!-- Gender -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-2">เพศ</label>
+            <select id="gender" class="w-full border border-gray-300 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300">
+              <option value="male">ชาย</option>
+              <option value="female">หญิง</option>
+            </select>
+          </div>
+
+          <!-- Age -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-2">อายุ</label>
+            <input type="number" id="age" placeholder="กรอกอายุ" class="w-full border border-gray-300 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300" required>
+          </div>
+
+          <!-- Height -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-2">ส่วนสูง (cm)</label>
+            <input type="number" id="height" placeholder="กรอกส่วนสูง" class="w-full border border-gray-300 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300" required>
+          </div>
+
+          <!-- Weight-->
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <label class="block text-gray-700 font-medium mb-2">นํ้าหนัก</label>
+              <input type="number" placeholder="กรอกนํ้าหนัก" id="weight" class="w-full border border-gray-300 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300" required>
+            </div>
+            <div class="w-28">
+              <label class="block text-gray-700 font-medium mb-2">หน่วย</label>
+              <select id="weightUnit" class="w-full border border-gray-300 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300">
+                <option value="kg">kg</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Activity Level -->
+          <div class="md:col-span-2">
+            <label class="block text-gray-700 font-medium mb-2">กิจวัตรในชีวิตประจําวัน</label>
+            <select id="activity" class="w-full border border-gray-300 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300">
+              <option value="low">ทํางาน/เรียน/ไม่ได้ออกกําลังกายเลย</option>
+              <option value="medium">ออกกําลังกายปานกลาง 3-5 วัน/สัปดาห์</option>
+              <option value="moderate">ออกกําลังกายหนัก 6-7 วัน/สัปดาห์</option>
+              <option value="heavy">ออกกําลังกายมาก ทุกวันเช้าและเย็น</option>
+            </select>
+          </div>
+
+          <!-- Daily Water Goal -->
+          <div class="flex gap-4 md:col-span-2">
+            <div class="flex-1">
+              <label class="block text-gray-700 font-medium mb-2">มิลลิลิตรตั้งเป้าที่จะดื่ม</label>
+              <input type="text" id="dailyGoal" class="w-full border border-gray-300 px-4 py-3 rounded-xl bg-gray-100" readonly>
+            </div>
+            <div class="w-28">
+              <label class="block text-gray-700 font-medium mb-2">หน่วย</label>
+              <select id="waterUnit" class="w-full border border-gray-300 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300">
+                <option value="ml">ml</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Save Button -->
+          <div class="md:col-span-2">
+            <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-xl hover:bg-blue-600 transition">บันทึกโปรไฟล์</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const userData = JSON.parse(localStorage.getItem("userData"));
+  
+  //สุ่มid ของผู้ใช้ที่ได้สมัครสมาชิกและล็อกอินเข้ามา
+  function generateUserId() {
+  return "U" + Math.floor(100000 + Math.random() * 900000); 
+}
+
+  // แสดงข้อมูล UserID เท่านั้น
+  document.getElementById("displayUserId").innerText = userData.userId;
+  document.getElementById("userId").value = userData.userId;
+
+  // Upload รูป
+  document.getElementById("uploadPic").addEventListener("change", function(e){
+    const file = e.target.files[0];
+    if(file){
+      const reader = new FileReader();
+      reader.onload = function(event){
+        document.getElementById("profilePic").src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // ฟังก์ชันคำนวณน้ำ
+  function calculateDailyGoal(gender, weight, weightUnit, activity, waterUnit){
+    let weightKg = weightUnit === "lbs" ? weight * 0.4536 : weight;
+    let mlPerKg = gender === "male" ? 35 : 31;
+    let liters = (weightKg * mlPerKg) / 1000;
+
+    if(activity === "low") liters+=0.1;
+    if(activity === "medium") liters+=0.2;
+    if(activity === "moderate") liters += 0.3;
+    if(activity === "heavy") liters += 0.5;
+
+    return waterUnit === "ml" ? (liters * 1000).toFixed(0) : liters.toFixed(2);
+  }
+
+  // บันทึกโปรไฟล์
+  document.getElementById("profileForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    const gender = document.getElementById("gender").value;
+    const age = document.getElementById("age").value;
+    const height = document.getElementById("height").value;
+    const weight = document.getElementById("weight").value;
+    const activity = document.getElementById("activity").value;
+    const weightUnit = document.getElementById("weightUnit").value;
+    const waterUnit = document.getElementById("waterUnit").value;
+
+    const dailyGoal = calculateDailyGoal(gender, weight, weightUnit, activity, waterUnit);
+    document.getElementById("dailyGoal").value = dailyGoal + " " + waterUnit;
+
+    const profile = { ...userData, gender, age, height, weight, weightUnit, activity, dailyGoal, waterUnit };
+
+    localStorage.setItem("userData", JSON.stringify(profile));
+    localStorage.setItem("profileData", JSON.stringify(profile));
+
+    alert("โปรไฟล์อัพเดทสำเร็จ\nคุณควรดื่มน้ำวันละ " + dailyGoal + " " + waterUnit);
+
+    // redirect ไปหน้าบันทึกน้ำ
+    window.location.href = "watertracker.html";
+  });
+
+  // ปุ่ม Logout
+  document.getElementById("logoutBtn").addEventListener("click", function() {
+    localStorage.removeItem("loggedInUser"); 
+    window.location.href = "loginwater.html"; 
+  });
+</script>
+</body>
+</html>
