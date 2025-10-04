@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <title>Login Water Tracker</title>
 <script src="https://cdn.tailwindcss.com"></script>
+
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+
 </head>
 <body class="bg-gradient-to-r from-blue-300 to-blue-500 flex items-center justify-center min-h-screen">
 
@@ -50,25 +55,48 @@
     </p>
   </div>
 
-<script>
-const users = JSON.parse(localStorage.getItem("users")) || [];
+ 
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
-document.getElementById("loginForm").addEventListener("submit", e=>{
-  e.preventDefault();
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value;
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_1IlE_sztfraOrwx1nbO0ETwYFVLQbZU",
+      authDomain: "water-tracker-db-d0d45.firebaseapp.com",
+      projectId: "water-tracker-db-d0d45",
+      storageBucket: "water-tracker-db-d0d45.firebasestorage.app",
+      messagingSenderId: "382656566913",
+      appId: "1:382656566913:web:b1a3a973437c6077dd1f80",
+      measurementId: "G-VSTQ6P15XG"
+    };
 
-  // ตรวจสอบผู้ใช้จาก email + password
-  const user = users.find(u => u.email === email && u.password === password);
-  
-  if(user){
-    localStorage.setItem("currentUser", JSON.stringify(user));
-    window.location.href = "profile-setup.html";
-  } else {
-    alert("Email หรือ Password ไม่ถูกต้อง");
-  }
-});
-</script>
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        
+        // สุ่ม User ID 5 หลัก เก็บไว้ localStorage (ไม่แสดง)
+        const userId = Math.floor(10000 + Math.random() * 90000).toString();
+        localStorage.setItem("userId", userId);
+
+        // Alert ว่าเข้าสู่ระบบสำเร็จ
+        alert("เข้าสู่ระบบสำเร็จ");
+
+        // Redirect ไปหน้า profile setup
+        window.location.href = "profile-setup.html";
+
+      } catch (error) {
+        alert("Login ไม่สำเร็จ: " + error.message);
+      }
+    });
+  </script>
 
 </body>
 </html>
