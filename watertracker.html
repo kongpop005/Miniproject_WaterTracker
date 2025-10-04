@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Water Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .progress-ring { transform: rotate(-90deg); }
+    .progress-ring__circle { transition: stroke-dashoffset 0.35s; transform-origin: 50% 50%; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-blue-200 min-h-screen flex justify-center items-start p-6">
+
+<div class="bg-white w-full max-w-5xl rounded-3xl shadow-2xl p-8">
+  <div class="flex justify-between mb-4">
+    <button onclick="window.location.href='profile-setup.html'" class="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Profile</button>
+    <button onclick="window.location.href='dashboard.html'" class="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Dashboard</button>
+  </div>
+
+  <h2 class="text-4xl font-bold text-center text-blue-700 mb-10 mr-14">Water Tracker</h2>
+
+  <!-- Progress Circle -->
+  <div class="flex justify-center mb-10">
+    <div class="relative w-72 h-72 flex items-center justify-center">
+      <svg class="progress-ring absolute w-full h-full" width="230" height="230">
+        <circle stroke="#d1d5db" stroke-width="14" fill="transparent" r="105" cx="115" cy="115"/>
+        <circle class="progress-ring__circle" stroke="#3b82f6" stroke-width="14" fill="transparent" r="105" cx="115" cy="115"/>
+      </svg>
+      <div class="absolute text-center mr-14 mt-8">
+        <p class="text-lg text-gray-500">ดื่มแล้ว</p>
+        <p class="text-2xl font-bold text-blue-700"><span id="currentMl">0</span> / <span id="goalMl">2000</span> ml</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Select Cup -->
+  <div class="bg-blue-50 p-6 rounded-2xl shadow-inner mb-10">
+    <h3 class="text-xl font-bold mb-4 text-blue-700">เลือกแก้วน้ำ</h3>
+    <div class="grid grid-cols-3 md:grid-cols-6 gap-4 text-center">
+      <button class="cupBtn border rounded-lg py-3 hover:bg-blue-100" data-ml="100">100 ml</button>
+      <button class="cupBtn border rounded-lg py-3 hover:bg-blue-100" data-ml="150">150 ml</button>
+      <button class="cupBtn border rounded-lg py-3 hover:bg-blue-100" data-ml="200">200 ml</button>
+      <button class="cupBtn border rounded-lg py-3 hover:bg-blue-100" data-ml="250">250 ml</button>
+      <button class="cupBtn border rounded-lg py-3 hover:bg-blue-100" data-ml="300">300 ml</button>
+      <button class="cupBtn border rounded-lg py-3 hover:bg-blue-100" data-ml="400">400 ml</button>
+    </div>
+    <div class="mt-4 flex gap-4 items-center">
+      <input type="number" id="customCup" placeholder="Custom ml" class="border px-3 py-2 rounded-lg flex-1">
+      <button id="saveCup" class="px-6 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600">บันทึก</button>
+    </div>
+  </div>
+
+  <!-- Drink History -->
+  <h3 class="text-2xl font-semibold mt-10 mb-4 text-blue-700">ประวัติการดื่มน้ำ</h3>
+  <div class="overflow-hidden rounded-2xl shadow-md">
+    <table class="w-full border-collapse">
+      <thead class="bg-blue-200">
+        <tr>
+          <th class="p-3 text-left">เวลา</th>
+          <th class="p-3 text-center">ปริมาณ (ml)</th>
+          <th class="p-3 text-center">แก้ไข/ลบ</th>
+        </tr>
+      </thead>
+      <tbody id="recordTable" class="bg-white divide-y divide-gray-200"></tbody>
+    </table>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, query, where, getDocs, addDoc, deleteDoc, updateDoc, doc, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyD_1IlE_sztfraOrwx1nbO0ETwYFVLQbZU",
+    authDomain: "water-tracker-db-d0d45.firebaseapp.com",
+    projectId: "water-tracker-db-d0d45",
+    storageBucket: "water-tracker-db-d0d45.firebasestorage.app",
+    messagingSenderId: "382656566913",
+    appId: "1:382656566913:web:b1a3a973437c6077dd1f80",
+    measurementId: "G-VSTQ6P15XG"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const currentMlEl = document.getElementById("currentMl");
+  const goalMlEl = document.getElementById("goalMl");
+  let selectedMl = 200;
+  const userId = localStorage.getItem("userId");
+  if(!userId){ alert("โปรดบันทึกโปรไฟล์ก่อน"); window.location.href="profile-setup.html"; }
+
+  let dailyGoal = 2000;
+
+  async function loadProfile(){
+    const profileRef = doc(db,"profiles",userId);
+    const profileSnap = await getDoc(profileRef);
+    if(profileSnap.exists()){
+      const data = profileSnap.data();
+      dailyGoal = data.dailyGoal || 2000;
+      goalMlEl.innerText = dailyGoal;
+      loadDrinkRecords();
+    } else {
+      alert("ไม่พบข้อมูลโปรไฟล์"); 
+      window.location.href="profile-setup.html";
+    }
+  }
+
+  // Progress Circle
+  const circle = document.querySelector(".progress-ring__circle");
+  const radius = circle.r.baseVal.value;
+  const circumference = 2 * Math.PI * radius;
+  circle.style.strokeDasharray = circumference;
+  circle.style.strokeDashoffset = circumference;
+  function setProgress(percent){ circle.style.strokeDashoffset = circumference - percent*circumference; }
+
+  // Load drink records
+  async function loadDrinkRecords(){
+    const q = query(collection(db,"drinkRecords"), where("userId","==",userId));
+    const snapshot = await getDocs(q);
+    const records = [];
+    snapshot.forEach(doc => records.push({id: doc.id, ...doc.data()}));
+    renderTable(records);
+    updateProgress(records);
+  }
+
+  function renderTable(records){
+    const tbody = document.getElementById("recordTable");
+    tbody.innerHTML = "";
+    records.forEach(r=>{
+      const tr = document.createElement("tr");
+      tr.className = "hover:bg-blue-50";
+      tr.innerHTML = `
+        <td class="p-3">${r.time}</td>
+        <td class="p-3 text-center">${r.ml} ml</td>
+        <td class="p-3 text-center flex justify-center gap-2">
+          <button onclick="editRecord('${r.id}', ${r.ml})" class="bg-yellow-400 px-3 py-1 rounded hover:bg-yellow-500">แก้ไข</button>
+          <button onclick="deleteRecord('${r.id}')" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">ลบ</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Delete record
+  window.deleteRecord = async (id) => {
+    if(!confirm("คุณต้องการลบบันทึกนี้หรือไม่?")) return;
+    try {
+      await deleteDoc(doc(db,"drinkRecords",id));
+      loadDrinkRecords();
+    } catch(e) {
+      console.error(e);
+      alert("เกิดข้อผิดพลาดในการลบข้อมูล");
+    }
+  }
+
+  // Edit record
+  window.editRecord = async (id, oldMl)=>{
+    const newMl = prompt("แก้ไขปริมาณน้ำ (ml)", oldMl);
+    if(newMl){
+      await updateDoc(doc(db,"drinkRecords",id), {ml: parseInt(newMl)});
+      loadDrinkRecords();
+    }
+  }
+
+  // Cup selection
+  document.querySelectorAll(".cupBtn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      selectedMl = parseInt(btn.getAttribute("data-ml"));
+      document.querySelectorAll(".cupBtn").forEach(b=>b.classList.remove("bg-blue-200"));
+      btn.classList.add("bg-blue-200");
+    });
+  });
+
+  // Save cup
+  document.getElementById("saveCup").addEventListener("click", async ()=>{
+    const customVal = parseInt(document.getElementById("customCup").value);
+    if(customVal) selectedMl = customVal;
+
+    const now = new Date();
+    const time = now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    const date = now.toISOString().split("T")[0];
+
+    await addDoc(collection(db,"drinkRecords"), {
+      userId, ml:selectedMl, time, date, createdAt: serverTimestamp()
+    });
+
+    document.getElementById("customCup").value = "";
+    loadDrinkRecords();
+  });
+
+  function updateProgress(records){
+    const total = records.reduce((sum,r)=>sum+r.ml,0);
+    currentMlEl.innerText = total;
+    setProgress(Math.min(total/dailyGoal,1));
+  }
+
+  loadProfile();
+</script>
+
+</body>
+</html>
