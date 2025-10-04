@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <title>Register Water Tracker</title>
 <script src="https://cdn.tailwindcss.com"></script>
+ 
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+
 </head>
 <body class="bg-gradient-to-r from-blue-300 to-blue-500 flex items-center justify-center min-h-screen">
 
@@ -50,10 +54,31 @@
     </form>
   </div>
 
+<!-- ส่วนฐานข้อมูลเชื่อมกับ firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
 
-<script>
-  const form = document.getElementById("registerForm");
-  form.addEventListener("submit", function(e){
+  // Import Authentication functions
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD_1IlE_sztfraOrwx1nbO0ETwYFVLQbZU",
+    authDomain: "water-tracker-db-d0d45.firebaseapp.com",
+    projectId: "water-tracker-db-d0d45",
+    storageBucket: "water-tracker-db-d0d45.firebasestorage.app",
+    messagingSenderId: "382656566913",
+    appId: "1:382656566913:web:b1a3a973437c6077dd1f80",
+    measurementId: "G-VSTQ6P15XG"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app); // <-- นี่คือ Firebase Auth
+
+  // ตัวอย่าง Register
+  document.getElementById("registerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     
     const email = document.getElementById("regEmail").value.trim();
@@ -61,29 +86,17 @@
     const confirmPassword = document.getElementById("regConfirmPassword").value;
 
     if(password !== confirmPassword){
-      alert("รหัสผ่านไม่ตรงกัน!");
+      alert("รหัสผ่านไม่ตรงกัน");
       return;
     }
 
-    // ดึง users เก่า หรือสร้าง array ใหม่
-    let users = JSON.parse(localStorage.getItem("users")) || [];
-
-    // ตรวจสอบ email ซ้ำ
-    if(users.some(u => u.email === email)){
-      alert("Email นี้ถูกใช้แล้ว");
-      return;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      alert("สมัครสมาชิกสำเร็จ");
+      window.location.href = "loginwater.html";
+    } catch(error){
+      alert("เกิดข้อผิดพลาด: " + error.message);
     }
-
-    const user = {
-      email,
-      password,
-      userId: "ID" + Date.now()
-    };
-
-    users.push(user);
-    localStorage.setItem("users", JSON.stringify(users));
-    alert("สมัครสมาชิกสำเร็จ!");
-    window.location.href = "loginwater.html"; // ไปหน้า login
   });
 </script>
 
